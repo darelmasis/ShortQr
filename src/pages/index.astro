@@ -23,11 +23,13 @@ const pageDescription = 'Crea enlaces cortos y genera su código QR al instante.
       </p>
     </header>
 
-    <UrlForm />
+    <div class="workspace">
+      <UrlForm />
 
-    <section class="result" id="result" aria-live="polite" hidden>
-      <ResultCard />
-    </section>
+      <section class="result" id="result" aria-live="polite" hidden>
+        <ResultCard />
+      </section>
+    </div>
   </main>
 
   <script>

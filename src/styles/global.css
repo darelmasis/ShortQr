@@ -125,6 +125,23 @@ a {
   overflow: hidden;
 }
 
+/* Con resultado visible y espacio, el formulario y el resultado van lado a lado */
+.workspace {
+  display: grid;
+  gap: var(--space-5);
+  align-items: start;
+}
+
+@media (min-width: 760px) {
+  .page:has(.result:not([hidden])) {
+    max-width: 920px;
+  }
+
+  .workspace:has(.result:not([hidden])) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
 .page--center {
   justify-content: center;
 }

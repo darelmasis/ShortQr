@@ -45,6 +45,7 @@ const pageDescription = 'Crea enlaces cortos y genera su código QR al instante.
 
     const STORAGE_KEY = 'shortqr:last-result'
     const resultSection = document.querySelector<HTMLElement>('#result')
+    const reset = document.querySelector<HTMLButtonElement>('[data-reset]')
 
     function showResult(payload: CreatedPayload): void {
       if (!resultSection) return
@@ -56,6 +57,7 @@ const pageDescription = 'Crea enlaces cortos y genera su código QR al instante.
       }
 
       resultSection.hidden = false
+      if (reset) reset.hidden = false
       window.dispatchEvent(new CustomEvent<CreatedPayload>('shortqr:render', { detail: payload }))
       resultSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
     }
@@ -64,6 +66,14 @@ const pageDescription = 'Crea enlaces cortos y genera su código QR al instante.
       const payload = (event as CustomEvent<CreatedPayload>).detail
       sessionStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
       showResult(payload)
+    })
+
+    reset?.addEventListener('click', () => {
+      sessionStorage.removeItem(STORAGE_KEY)
+      if (resultSection) resultSection.hidden = true
+      if (reset) reset.hidden = true
+      window.dispatchEvent(new CustomEvent('shortqr:reset'))
+      document.querySelector<HTMLInputElement>('[data-url-input]')?.focus()
     })
 
     const saved = sessionStorage.getItem(STORAGE_KEY)

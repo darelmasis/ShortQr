@@ -231,6 +231,10 @@ a {
   font-weight: 500;
 }
 
+.url-form__reset {
+  margin-top: var(--space-3);
+}
+
 /* ============ Modo ============ */
 
 .mode-options {

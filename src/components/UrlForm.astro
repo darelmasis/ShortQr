@@ -23,6 +23,8 @@ import UrlOptions from './UrlOptions.astro'
   <UrlOptions />
 
   <p class="form-error" data-form-error role="alert" hidden></p>
+
+  <Button class="url-form__reset" variant="secondary" data-reset hidden>Empezar nuevo</Button>
 </form>
 
 <script>
@@ -52,6 +54,15 @@ import UrlOptions from './UrlOptions.astro'
 
   window.addEventListener('shortqr:options', (event) => {
     options = (event as CustomEvent<QrOptions>).detail
+  })
+
+  window.addEventListener('shortqr:reset', () => {
+    if (input) input.value = ''
+    const radio = document.querySelector<HTMLInputElement>('input[name="qr-mode"][value="short"]')
+    if (radio) radio.checked = true
+    options = { mode: 'short' }
+    window.dispatchEvent(new CustomEvent<QrOptions>('shortqr:options', { detail: { mode: 'short' } }))
+    clearError()
   })
 
   function showError(message: string): void {

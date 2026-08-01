@@ -490,10 +490,44 @@ a {
   text-decoration: underline;
 }
 
-.copy-feedback {
+.copy-icon {
+  display: inline-flex;
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+}
+
+.copy-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.copy-icon .copy-icon__ok,
+.copy-icon .copy-icon__err {
+  display: none;
+}
+
+.result-card__copy.copy-icon--ok .copy-icon__ok {
+  display: block;
+}
+
+.result-card__copy.copy-icon--err .copy-icon__err {
+  display: block;
+}
+
+.result-card__copy.copy-icon--ok .copy-icon__base,
+.result-card__copy.copy-icon--err .copy-icon__base {
+  display: none;
+}
+
+.result-card__copy.copy-icon--ok {
   color: var(--success);
-  font-size: 0.875rem;
-  font-weight: 500;
+  border-color: var(--success);
+}
+
+.result-card__copy.copy-icon--err {
+  color: var(--error);
+  border-color: var(--error);
 }
 
 /* ============ Tarjeta QR ============ */

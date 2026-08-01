@@ -33,9 +33,18 @@ const pageDescription = 'Crea enlaces cortos y genera su código QR al instante.
   </main>
 
   <script>
+    interface QrOptions {
+      mode: 'short' | 'direct'
+      color: string
+      style: 'classic' | 'dots' | 'rounded'
+      logo: boolean
+      size: number
+    }
+
     interface CreatedPayload {
       shortUrl: string
       slug: string
+      qrOptions?: QrOptions
     }
 
     const STORAGE_KEY = 'shortqr:last-result'

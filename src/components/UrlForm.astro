@@ -1,5 +1,6 @@
 ---
 import Button from './Button.astro'
+import UrlOptions from './UrlOptions.astro'
 ---
 
 <form class="url-form" id="url-form" novalidate>
@@ -18,10 +19,27 @@ import Button from './Button.astro'
     />
     <Button class="url-form__submit" type="submit" data-submit>Generar</Button>
   </div>
+
+  <UrlOptions />
+
   <p class="form-error" data-form-error role="alert" hidden></p>
 </form>
 
 <script>
+  interface QrOptions {
+    mode: 'short' | 'direct'
+    color: string
+    style: 'classic' | 'dots' | 'rounded'
+    logo: boolean
+    size: number
+  }
+
+  interface CreatedPayload {
+    shortUrl: string
+    slug: string
+    qrOptions?: QrOptions
+  }
+
   interface CreateApiResponse {
     success: boolean
     shortUrl?: string
@@ -33,6 +51,18 @@ import Button from './Button.astro'
   const input = document.querySelector<HTMLInputElement>('[data-url-input]')
   const submit = document.querySelector<HTMLButtonElement>('[data-submit]')
   const error = document.querySelector<HTMLParagraphElement>('[data-form-error]')
+
+  let options: QrOptions = {
+    mode: 'short',
+    color: '#171717',
+    style: 'classic',
+    logo: false,
+    size: 1024,
+  }
+
+  window.addEventListener('shortqr:options', (event) => {
+    options = (event as CustomEvent<QrOptions>).detail
+  })
 
   function showError(message: string): void {
     if (!error) return
@@ -51,19 +81,37 @@ import Button from './Button.astro'
     submit.textContent = loading ? 'Generando…' : 'Generar'
   }
 
+  function dispatchCreated(payload: CreatedPayload): void {
+    window.dispatchEvent(new CustomEvent<CreatedPayload>('shortqr:created', { detail: payload }))
+  }
+
   form?.addEventListener('submit', async (event) => {
     event.preventDefault()
     clearError()
 
-    const url = input?.value.trim() ?? ''
-    if (url.length === 0) {
+    const raw = input?.value.trim() ?? ''
+    if (raw.length === 0) {
       showError('Escribe una URL para continuar.')
       input?.focus()
       return
     }
 
+    let url = raw
+    if (!/^https?:\/\//i.test(url)) url = `https://${url}`
+    try {
+      new URL(url)
+    } catch {
+      showError('La URL no es válida.')
+      return
+    }
+
     setLoading(true)
     try {
+      if (options.mode === 'direct') {
+        dispatchCreated({ shortUrl: url, slug: '', qrOptions: options })
+        return
+      }
+
       const response = await fetch('/api/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -76,11 +124,7 @@ import Button from './Button.astro'
         return
       }
 
-      window.dispatchEvent(
-        new CustomEvent('shortqr:created', {
-          detail: { shortUrl: data.shortUrl, slug: data.slug },
-        }),
-      )
+      dispatchCreated({ shortUrl: data.shortUrl, slug: data.slug, qrOptions: options })
     } catch {
       showError('No se pudo conectar con el servidor. Intenta de nuevo.')
     } finally {

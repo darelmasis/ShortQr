@@ -10,8 +10,18 @@ Vercel.
 - **TypeScript strict**
 - **MongoDB Atlas** — driver oficial (`mongodb`), sin Mongoose
 - **Vercel Serverless Functions**
-- **QR en el cliente** — librería `qrcode` (SVG en pantalla, PNG para descarga)
+- **QR en el cliente** — librería `qrcode` (renderizado a canvas: SVG y PNG)
 - **CSS moderno** — sin frameworks de UI, solo variables CSS y componentes Astro
+
+## Características
+
+- Acortado de URLs con slugs criptográficos sin colisiones
+- **QR directo**: generar el código QR con la URL tal cual, sin acortar
+- QR con **colores** (6 presets), **estilos de módulos** (cuadrados, puntos, suave) y **logo central**
+- Descarga del QR en **PNG** con tamaño configurable (512, 1024 o 2048 px)
+- Redirección 302 con registro de visitas y última visita
+- Estadísticas básicas por enlace (`/api/stats?slug=…`)
+- Diseño de una sola pantalla, sin scroll, con formulario y resultado lado a lado en escritorio
 
 ## Requisitos
 

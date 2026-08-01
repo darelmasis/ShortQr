@@ -1,0 +1,148 @@
+---
+const COLOR_PRESETS = [
+  { value: '#171717', label: 'Negro' },
+  { value: '#1d4ed8', label: 'Azul' },
+  { value: '#15803d', label: 'Verde' },
+  { value: '#dc2626', label: 'Rojo' },
+  { value: '#7c3aed', label: 'Violeta' },
+  { value: '#db2777', label: 'Rosa' },
+] as const
+---
+
+<div class="options">
+  <button
+    class="options__toggle"
+    type="button"
+    data-options-toggle
+    aria-expanded="false"
+    aria-controls="options-panel"
+  >
+    Opciones <span class="options__chevron" aria-hidden="true"></span>
+  </button>
+
+  <div class="options__panel" id="options-panel" data-options-panel hidden>
+    <div class="options__row">
+      <span class="options__label" id="options-mode-label">Modo</span>
+      <div
+        class="segmented"
+        role="radiogroup"
+        aria-labelledby="options-mode-label"
+        data-options-mode
+      >
+        <label>
+          <input type="radio" name="qr-mode" value="short" checked />
+          <span>Acortar + QR</span>
+        </label>
+        <label>
+          <input type="radio" name="qr-mode" value="direct" />
+          <span>QR directo</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="options__row">
+      <span class="options__label" id="options-color-label">Color</span>
+      <div
+        class="swatches"
+        role="radiogroup"
+        aria-labelledby="options-color-label"
+        data-options-color
+      >
+        {
+          COLOR_PRESETS.map((preset) => (
+            <label class="swatch" style={`--swatch:${preset.value}`}>
+              <input
+                type="radio"
+                name="qr-color"
+                value={preset.value}
+                checked={preset.value === '#171717'}
+              />
+              <span class="sr-only">{preset.label}</span>
+            </label>
+          ))
+        }
+      </div>
+
+      <span class="options__label" id="options-style-label">Estilo</span>
+      <div
+        class="segmented"
+        role="radiogroup"
+        aria-labelledby="options-style-label"
+        data-options-style
+      >
+        <label>
+          <input type="radio" name="qr-style" value="classic" checked />
+          <span>Cuadrados</span>
+        </label>
+        <label>
+          <input type="radio" name="qr-style" value="dots" />
+          <span>Puntos</span>
+        </label>
+        <label>
+          <input type="radio" name="qr-style" value="rounded" />
+          <span>Suave</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="options__row">
+      <label class="options__switch">
+        <input type="checkbox" data-options-logo />
+        <span>Logo central</span>
+      </label>
+
+      <span class="options__label" id="options-size-label">Tamaño PNG</span>
+      <select class="options__select" data-options-size aria-labelledby="options-size-label">
+        <option value="512">512 px</option>
+        <option value="1024" selected>1024 px</option>
+        <option value="2048">2048 px</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<script>
+  interface QrOptions {
+    mode: 'short' | 'direct'
+    color: string
+    style: 'classic' | 'dots' | 'rounded'
+    logo: boolean
+    size: number
+  }
+
+  const panel = document.querySelector<HTMLElement>('[data-options-panel]')
+  const toggle = document.querySelector<HTMLButtonElement>('[data-options-toggle]')
+
+  toggle?.addEventListener('click', () => {
+    const open = toggle.getAttribute('aria-expanded') === 'true'
+    toggle.setAttribute('aria-expanded', String(!open))
+    if (panel) panel.hidden = open
+  })
+
+  function readOptions(): QrOptions {
+    const mode = (document.querySelector<HTMLInputElement>('input[name="qr-mode"]:checked')
+      ?.value ?? 'short') as QrOptions['mode']
+    const color =
+      document.querySelector<HTMLInputElement>('input[name="qr-color"]:checked')?.value ?? '#171717'
+    const style = (document.querySelector<HTMLInputElement>('input[name="qr-style"]:checked')
+      ?.value ?? 'classic') as QrOptions['style']
+    const logo = document.querySelector<HTMLInputElement>('[data-options-logo]')?.checked ?? false
+    const size = Number(
+      document.querySelector<HTMLSelectElement>('[data-options-size]')?.value ?? 1024,
+    )
+    return { mode, color, style, logo, size }
+  }
+
+  const groups = ['[data-options-mode]', '[data-options-color]', '[data-options-style]']
+  for (const selector of groups) {
+    document.querySelector(selector)?.addEventListener('change', () => {
+      window.dispatchEvent(new CustomEvent<QrOptions>('shortqr:options', { detail: readOptions() }))
+    })
+  }
+  document.querySelector('[data-options-logo]')?.addEventListener('change', () => {
+    window.dispatchEvent(new CustomEvent<QrOptions>('shortqr:options', { detail: readOptions() }))
+  })
+  document.querySelector('[data-options-size]')?.addEventListener('change', () => {
+    window.dispatchEvent(new CustomEvent<QrOptions>('shortqr:options', { detail: readOptions() }))
+  })
+</script>

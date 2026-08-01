@@ -1,0 +1,19 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+
+const pageTitle = 'Página no encontrada · ShortQR'
+---
+
+<BaseLayout title={pageTitle}>
+  <main class="page page--center">
+    <header class="hero">
+      <a class="brand" href="/" aria-label="ShortQR — inicio">
+        <img class="brand__mark" src="/favicon.svg" alt="" width="36" height="36" />
+        <span class="brand__name">ShortQR</span>
+      </a>
+      <h1 class="hero__title">404 · Enlace no encontrado</h1>
+      <p class="hero__subtitle">El enlace que buscas no existe, fue desactivado o ya expiró.</p>
+      <a class="btn btn--primary" href="/">Crear un enlace nuevo</a>
+    </header>
+  </main>
+</BaseLayout>

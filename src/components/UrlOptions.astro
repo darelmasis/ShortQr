@@ -91,6 +91,11 @@ const COLOR_PRESETS = [
         <span>Logo central</span>
       </label>
 
+      <label class="options__switch" title="Codifica la URL en mayúsculas: QR más compacto con dominios cortos">
+        <input type="checkbox" data-options-uppercase />
+        <span>Mayúsculas</span>
+      </label>
+
       <span class="options__label" id="options-size-label">Tamaño PNG</span>
       <select class="options__select" data-options-size aria-labelledby="options-size-label">
         <option value="512">512 px</option>
@@ -107,6 +112,7 @@ const COLOR_PRESETS = [
     color: string
     style: 'classic' | 'dots' | 'rounded'
     logo: boolean
+    uppercase: boolean
     size: number
   }
 
@@ -127,10 +133,12 @@ const COLOR_PRESETS = [
     const style = (document.querySelector<HTMLInputElement>('input[name="qr-style"]:checked')
       ?.value ?? 'classic') as QrOptions['style']
     const logo = document.querySelector<HTMLInputElement>('[data-options-logo]')?.checked ?? false
+    const uppercase =
+      document.querySelector<HTMLInputElement>('[data-options-uppercase]')?.checked ?? false
     const size = Number(
       document.querySelector<HTMLSelectElement>('[data-options-size]')?.value ?? 1024,
     )
-    return { mode, color, style, logo, size }
+    return { mode, color, style, logo, uppercase, size }
   }
 
   const groups = ['[data-options-mode]', '[data-options-color]', '[data-options-style]']
@@ -140,6 +148,9 @@ const COLOR_PRESETS = [
     })
   }
   document.querySelector('[data-options-logo]')?.addEventListener('change', () => {
+    window.dispatchEvent(new CustomEvent<QrOptions>('shortqr:options', { detail: readOptions() }))
+  })
+  document.querySelector('[data-options-uppercase]')?.addEventListener('change', () => {
     window.dispatchEvent(new CustomEvent<QrOptions>('shortqr:options', { detail: readOptions() }))
   })
   document.querySelector('[data-options-size]')?.addEventListener('change', () => {

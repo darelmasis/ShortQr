@@ -17,7 +17,7 @@ Vercel.
 
 - Acortado de URLs con slugs criptográficos sin colisiones
 - **QR directo**: generar el código QR con la URL tal cual, sin acortar
-- QR con **colores** (6 presets), **estilos de módulos** (cuadrados, puntos, suave) y **logo central**
+- QR con **colores** (6 presets), **estilos de módulos** (cuadrados, puntos, suave), **logo central** y **codificación en mayúsculas** (QR hasta 30% más compacto: versión 1 con dominios cortos; los slugs se generan solo con mayúsculas para que siempre sea seguro)
 - Descarga del QR en **PNG** con tamaño configurable (512, 1024 o 2048 px)
 - Redirección 302 con registro de visitas y última visita
 - Estadísticas básicas por enlace (`/api/stats?slug=…`)

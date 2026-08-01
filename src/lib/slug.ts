@@ -1,8 +1,9 @@
 import { randomInt } from 'node:crypto'
 
-// Base58 sin caracteres ambiguos (0, O, I, l, 1) para enlaces fáciles de leer
-// y tipear manualmente.
-const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789'
+// Base32 sin caracteres ambiguos (0, O, I, l, 1) y solo mayúsculas:
+// permite que el QR codifique la URL en modo alfanumérico (mayúsculas)
+// y baje de versión con dominios cortos.
+const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
 
 export function generateSlug(length: number): string {
   if (!Number.isInteger(length) || length <= 0) {

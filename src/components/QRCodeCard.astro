@@ -18,6 +18,7 @@ import Button from './Button.astro'
     color: string
     style: 'classic' | 'dots' | 'rounded'
     logo: boolean
+    uppercase: boolean
     size: number
   }
 
@@ -74,7 +75,8 @@ import Button from './Button.astro'
   }
 
   function renderQr(text: string, options: QrOptions, pixelSize: number): HTMLCanvasElement {
-    const qr = QRCode.create(text, {
+    const encoded = options.uppercase ? text.toUpperCase() : text
+    const qr = QRCode.create(encoded, {
       errorCorrectionLevel: options.logo ? 'H' : 'L',
     })
 
@@ -115,6 +117,7 @@ import Button from './Button.astro'
       color: '#171717',
       style: 'classic',
       logo: false,
+      uppercase: false,
       size: 1024,
     }
 
@@ -126,6 +129,16 @@ import Button from './Button.astro'
     ctx?.drawImage(rendered, 0, 0)
   })
 
+  window.addEventListener('shortqr:options', (event) => {
+    const options = (event as CustomEvent<QrOptions>).detail
+    if (!current || !canvas) return
+    current = { ...current, qrOptions: options }
+    const rendered = renderQr(current.shortUrl, options, DISPLAY_PX)
+    canvas.width = rendered.width
+    canvas.height = rendered.height
+    canvas.getContext('2d')?.drawImage(rendered, 0, 0)
+  })
+
   download?.addEventListener('click', () => {
     if (!current) return
 
@@ -134,6 +147,7 @@ import Button from './Button.astro'
       color: '#171717',
       style: 'classic',
       logo: false,
+      uppercase: false,
       size: 1024,
     }
 

@@ -28,11 +28,6 @@ import UrlOptions from './UrlOptions.astro'
 <script>
   interface QrOptions {
     mode: 'short' | 'direct'
-    color: string
-    style: 'classic' | 'dots' | 'rounded'
-    logo: boolean
-    uppercase: boolean
-    size: number
   }
 
   interface CreatedPayload {
@@ -53,14 +48,7 @@ import UrlOptions from './UrlOptions.astro'
   const submit = document.querySelector<HTMLButtonElement>('[data-submit]')
   const error = document.querySelector<HTMLParagraphElement>('[data-form-error]')
 
-  let options: QrOptions = {
-    mode: 'short',
-    color: '#171717',
-    style: 'classic',
-    logo: false,
-    uppercase: false,
-    size: 1024,
-  }
+  let options: QrOptions = { mode: 'short' }
 
   window.addEventListener('shortqr:options', (event) => {
     options = (event as CustomEvent<QrOptions>).detail

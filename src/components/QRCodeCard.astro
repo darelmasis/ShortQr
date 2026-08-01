@@ -7,7 +7,44 @@ import Button from './Button.astro'
     <canvas class="qr-card__canvas" data-qr-canvas role="img" aria-label="Código QR del enlace"
     ></canvas>
   </div>
-  <Button class="qr-card__download" variant="secondary" data-qr-download> Descargar QR </Button>
+
+  <div class="qr-card__actions">
+    <Button class="qr-card__copy" variant="secondary" data-copy-png aria-label="Copiar QR como PNG">
+      <span class="copy-icon">
+        <svg class="copy-icon__base" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg>
+        <svg class="copy-icon__ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M20 6 9 17l-5-5"></path>
+        </svg>
+        <svg class="copy-icon__err" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M18 6 6 18"></path>
+          <path d="m6 6 12 12"></path>
+        </svg>
+      </span>
+      <span>Copiar PNG</span>
+      <span class="sr-only" data-copy-png-status aria-live="polite"></span>
+    </Button>
+
+    <Button class="qr-card__copy" variant="secondary" data-copy-svg aria-label="Copiar QR como SVG">
+      <span class="copy-icon">
+        <svg class="copy-icon__base" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg>
+        <svg class="copy-icon__ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M20 6 9 17l-5-5"></path>
+        </svg>
+        <svg class="copy-icon__err" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M18 6 6 18"></path>
+          <path d="m6 6 12 12"></path>
+        </svg>
+      </span>
+      <span>Copiar SVG</span>
+      <span class="sr-only" data-copy-svg-status aria-live="polite"></span>
+    </Button>
+  </div>
 </div>
 
 <script>
@@ -15,11 +52,6 @@ import Button from './Button.astro'
 
   interface QrOptions {
     mode: 'short' | 'direct'
-    color: string
-    style: 'classic' | 'dots' | 'rounded'
-    logo: boolean
-    uppercase: boolean
-    size: number
   }
 
   interface QrPayload {
@@ -29,56 +61,15 @@ import Button from './Button.astro'
   }
 
   const DISPLAY_PX = 300
+  const PNG_PX = 1024
   const QR_MARGIN = 2
-  const LOGO_RATIO = 0.24
+  const QR_COLOR = '#171717'
 
   const canvas = document.querySelector<HTMLCanvasElement>('[data-qr-canvas]')
-  const download = document.querySelector<HTMLButtonElement>('[data-qr-download]')
   let current: QrPayload | null = null
 
-  const logoImage = new Image()
-  logoImage.src = '/favicon.svg'
-  void logoImage.decode().catch(() => undefined)
-
-  function drawModule(
-    ctx: CanvasRenderingContext2D,
-    x: number,
-    y: number,
-    unit: number,
-    style: QrOptions['style'],
-  ): void {
-    ctx.beginPath()
-    if (style === 'dots') {
-      ctx.arc(x + unit / 2, y + unit / 2, unit * 0.42, 0, Math.PI * 2)
-    } else if (style === 'rounded') {
-      ctx.roundRect(x, y, unit, unit, unit * 0.32)
-    } else {
-      ctx.rect(x, y, unit, unit)
-    }
-    ctx.fill()
-  }
-
-  function drawLogo(ctx: CanvasRenderingContext2D, size: number): void {
-    const logoSize = Math.max(16, Math.round(size * LOGO_RATIO))
-    const x = (size - logoSize) / 2
-    const y = (size - logoSize) / 2
-    const pad = Math.round(logoSize * 0.14)
-
-    ctx.fillStyle = '#ffffff'
-    ctx.beginPath()
-    ctx.roundRect(x - pad, y - pad, logoSize + pad * 2, logoSize + pad * 2, logoSize * 0.2)
-    ctx.fill()
-
-    if (logoImage.complete && logoImage.naturalWidth > 0) {
-      ctx.drawImage(logoImage, x, y, logoSize, logoSize)
-    }
-  }
-
-  function renderQr(text: string, options: QrOptions, pixelSize: number): HTMLCanvasElement {
-    const encoded = options.uppercase ? text.toUpperCase() : text
-    const qr = QRCode.create(encoded, {
-      errorCorrectionLevel: options.logo ? 'H' : 'L',
-    })
+  function renderQr(text: string, pixelSize: number): HTMLCanvasElement {
+    const qr = QRCode.create(text, { errorCorrectionLevel: 'L' })
 
     const modules = qr.modules.size
     const unit = Math.floor(pixelSize / (modules + QR_MARGIN * 2))
@@ -93,72 +84,114 @@ import Button from './Button.astro'
 
     ctx.fillStyle = '#ffffff'
     ctx.fillRect(0, 0, size, size)
-    ctx.fillStyle = options.color
+    ctx.fillStyle = QR_COLOR
 
     for (let row = 0; row < modules; row++) {
       for (let col = 0; col < modules; col++) {
         if (qr.modules.get(row, col)) {
-          drawModule(ctx, (col + QR_MARGIN) * unit, (row + QR_MARGIN) * unit, unit, options.style)
+          ctx.fillRect((col + QR_MARGIN) * unit, (row + QR_MARGIN) * unit, unit, unit)
         }
       }
     }
 
-    if (options.logo) drawLogo(ctx, size)
-
     return target
+  }
+
+  function renderSvg(text: string): string {
+    const qr = QRCode.create(text, { errorCorrectionLevel: 'L' })
+
+    const modules = qr.modules.size
+    const total = modules + QR_MARGIN * 2
+    let cells = ''
+    for (let row = 0; row < modules; row++) {
+      for (let col = 0; col < modules; col++) {
+        if (qr.modules.get(row, col)) {
+          cells += `<rect x="${col + QR_MARGIN}" y="${row + QR_MARGIN}" width="1" height="1"/>`
+        }
+      }
+    }
+
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${total} ${total}" shape-rendering="crispEdges"><rect width="100%" height="100%" fill="#ffffff"/><g fill="${QR_COLOR}">${cells}</g></svg>`
+  }
+
+  async function copyText(text: string): Promise<boolean> {
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text)
+        return true
+      }
+    } catch {}
+    try {
+      const textarea = document.createElement('textarea')
+      textarea.value = text
+      textarea.setAttribute('readonly', '')
+      textarea.style.position = 'fixed'
+      textarea.style.opacity = '0'
+      document.body.appendChild(textarea)
+      textarea.select()
+      const ok = document.execCommand('copy')
+      textarea.remove()
+      return ok
+    } catch {
+      return false
+    }
+  }
+
+  async function copyImage(blob: Blob): Promise<boolean> {
+    try {
+      if (navigator.clipboard && typeof ClipboardItem !== 'undefined') {
+        await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
+        return true
+      }
+    } catch {}
+    return false
+  }
+
+  function setState(button: HTMLButtonElement | null, status: HTMLElement | null, state: 'idle' | 'ok' | 'err'): void {
+    if (!button) return
+    button.classList.toggle('copy-icon--ok', state === 'ok')
+    button.classList.toggle('copy-icon--err', state === 'err')
+    if (status) {
+      status.textContent =
+        state === 'ok' ? 'QR copiado' : state === 'err' ? 'No se pudo copiar' : ''
+    }
   }
 
   window.addEventListener('shortqr:render', (event) => {
     const payload = (event as CustomEvent<QrPayload>).detail
     current = payload
 
-    const options: QrOptions = payload.qrOptions ?? {
-      mode: 'short',
-      color: '#171717',
-      style: 'classic',
-      logo: false,
-      uppercase: false,
-      size: 1024,
-    }
-
     if (!canvas) return
-    const rendered = renderQr(payload.shortUrl, options, DISPLAY_PX)
-    canvas.width = rendered.width
-    canvas.height = rendered.height
-    const ctx = canvas.getContext('2d')
-    ctx?.drawImage(rendered, 0, 0)
-  })
-
-  window.addEventListener('shortqr:options', (event) => {
-    const options = (event as CustomEvent<QrOptions>).detail
-    if (!current || !canvas) return
-    current = { ...current, qrOptions: options }
-    const rendered = renderQr(current.shortUrl, options, DISPLAY_PX)
+    const rendered = renderQr(payload.shortUrl, DISPLAY_PX)
     canvas.width = rendered.width
     canvas.height = rendered.height
     canvas.getContext('2d')?.drawImage(rendered, 0, 0)
   })
 
-  download?.addEventListener('click', () => {
+  document.querySelector('[data-copy-png]')?.addEventListener('click', () => {
     if (!current) return
-
-    const options: QrOptions = current.qrOptions ?? {
-      mode: 'short',
-      color: '#171717',
-      style: 'classic',
-      logo: false,
-      uppercase: false,
-      size: 1024,
-    }
-
-    const rendered = renderQr(current.shortUrl, options, options.size)
-    rendered.toBlob((blob) => {
-      if (!blob) return
-      const anchor = document.createElement('a')
-      anchor.href = URL.createObjectURL(blob)
-      anchor.download = `shortqr-${current?.slug || 'qr'}.png`
-      anchor.click()
-      URL.revokeObjectURL(anchor.href)
+    const button = document.querySelector<HTMLButtonElement>('[data-copy-png]')
+    const status = document.querySelector<HTMLElement>('[data-copy-png-status]')
+    const rendered = renderQr(current.shortUrl, PNG_PX)
+    rendered.toBlob(async (blob) => {
+      if (!blob) {
+        setState(button, status, 'err')
+        return
+      }
+      const ok = await copyImage(blob)
+      setState(button, status, ok ? 'ok' : 'err')
+      window.setTimeout(() => setState(button, status, 'idle'), 2000)
     }, 'image/png')
+  })
+
+  document.querySelector('[data-copy-svg]')?.addEventListener('click', () => {
+    if (!current) return
+    const button = document.querySelector<HTMLButtonElement>('[data-copy-svg]')
+    const status = document.querySelector<HTMLElement>('[data-copy-svg-status]')
+    void (async () => {
+      const ok = await copyText(renderSvg(current?.shortUrl ?? ''))
+      setState(button, status, ok ? 'ok' : 'err')
+      window.setTimeout(() => setState(button, status, 'idle'), 2000)
+    })()
   })
 </script>

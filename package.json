@@ -8,7 +8,7 @@
     "node": ">=18.17.1"
   },
   "scripts": {
-    "dev": "astro dev",
+    "dev": "astro dev --host",
     "build": "astro build",
     "preview": "astro preview",
     "lint": "eslint .",
@@ -27,9 +27,11 @@
     "@astrojs/check": "^0.9.10",
     "@types/node": "^26.1.2",
     "@types/qrcode": "^1.5.6",
+    "cssnano": "^8.0.2",
     "eslint": "^10.8.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-astro": "^1.7.0",
+    "postcss": "^8.5.25",
     "prettier": "^3.9.6",
     "prettier-plugin-astro": "^0.14.1",
     "typescript": "^6.0.3",

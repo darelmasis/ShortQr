@@ -54,10 +54,13 @@ Vercel.
 4. Ejecutar:
 
    ```bash
-   npm run dev      # desarrollo
+   npm run dev      # desarrollo (expuesto en la red local, ej: http://192.168.x.x:4321)
    npm run build    # producción (genera .vercel/output)
    npm run preview  # previsualizar el build localmente
    ```
+
+   El CSS se sirve minificado tanto en desarrollo como en producción
+   (cssnano vía PostCSS + LightningCSS de Vite en el build).
 
 > **Nota**: con el adaptador `@astrojs/vercel`, `astro preview` no está
 > soportado. Para probar el build de producción localmente usa

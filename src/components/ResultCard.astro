@@ -6,7 +6,14 @@ import QRCodeCard from './QRCodeCard.astro'
 <div class="result-card">
   <div class="result-card__row">
     <a class="result-card__link" data-result-short href="#" target="_blank" rel="noreferrer"> — </a>
-    <Button class="result-card__copy" variant="secondary" data-copy aria-label="Copiar enlace corto"> Copiar </Button>
+    <Button
+      class="result-card__copy"
+      variant="secondary"
+      data-copy
+      aria-label="Copiar enlace corto"
+    >
+      Copiar
+    </Button>
   </div>
   <p class="copy-feedback" data-copy-feedback aria-live="polite" hidden></p>
   <QRCodeCard />

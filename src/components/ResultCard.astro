@@ -1,0 +1,37 @@
+---
+import Button from './Button.astro'
+import QRCodeCard from './QRCodeCard.astro'
+---
+
+<div class="result-card">
+  <div class="result-card__row">
+    <a class="result-card__link" data-result-short href="#" target="_blank" rel="noreferrer"> — </a>
+    <Button class="result-card__copy" data-copy aria-label="Copiar enlace corto"> Copiar </Button>
+  </div>
+  <p class="copy-feedback" data-copy-feedback aria-live="polite" hidden></p>
+  <QRCodeCard />
+</div>
+
+<script>
+  const link = document.querySelector<HTMLAnchorElement>('[data-result-short]')
+  const copy = document.querySelector<HTMLButtonElement>('[data-copy]')
+  const feedback = document.querySelector<HTMLParagraphElement>('[data-copy-feedback]')
+
+  async function copyUrl(): Promise<void> {
+    if (!link || !copy || !feedback) return
+
+    try {
+      await navigator.clipboard.writeText(link.href)
+      feedback.textContent = '¡Enlace copiado al portapapeles!'
+      copy.textContent = '¡Copiado!'
+      window.setTimeout(() => {
+        copy.textContent = 'Copiar'
+      }, 2000)
+    } catch {
+      feedback.textContent = 'No se pudo copiar el enlace.'
+    }
+    feedback.hidden = false
+  }
+
+  copy?.addEventListener('click', () => void copyUrl())
+</script>

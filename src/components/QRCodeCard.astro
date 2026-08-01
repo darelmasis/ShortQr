@@ -1,0 +1,47 @@
+---
+import Button from './Button.astro'
+---
+
+<div class="qr-card">
+  <div class="qr-card__box" data-qr-svg role="img" aria-label="Código QR del enlace corto"></div>
+  <Button class="qr-card__download" data-qr-download> Descargar QR </Button>
+</div>
+
+<script>
+  import QRCode from 'qrcode'
+
+  interface QrPayload {
+    shortUrl: string
+    slug: string
+  }
+
+  const container = document.querySelector<HTMLElement>('[data-qr-svg]')
+  const download = document.querySelector<HTMLButtonElement>('[data-qr-download]')
+  let current: QrPayload | null = null
+
+  async function render(payload: QrPayload): Promise<void> {
+    current = payload
+    if (!container) return
+    const svg = await QRCode.toString(payload.shortUrl, { type: 'svg', margin: 1 })
+    container.innerHTML = svg
+  }
+
+  window.addEventListener('shortqr:render', (event) => {
+    const payload = (event as CustomEvent<QrPayload>).detail
+    void render(payload)
+  })
+
+  download?.addEventListener('click', () => {
+    if (!current) return
+    void (async () => {
+      const dataUrl = await QRCode.toDataURL(current.shortUrl, {
+        width: 1024,
+        margin: 2,
+      })
+      const anchor = document.createElement('a')
+      anchor.href = dataUrl
+      anchor.download = `shortqr-${current.slug}.png`
+      anchor.click()
+    })()
+  })
+</script>

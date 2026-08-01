@@ -1,0 +1,75 @@
+---
+// Página estática: se sirve desde el CDN de Vercel, sin tocar la base de datos.
+export const prerender = true
+
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import ResultCard from '@/components/ResultCard.astro'
+import UrlForm from '@/components/UrlForm.astro'
+
+const pageTitle = 'ShortQR · Acortador de URLs con código QR'
+const pageDescription = 'Crea enlaces cortos y genera su código QR al instante.'
+---
+
+<BaseLayout title={pageTitle} description={pageDescription}>
+  <main class="page">
+    <header class="hero">
+      <a class="brand" href="/" aria-label="ShortQR — inicio">
+        <img class="brand__mark" src="/favicon.svg" alt="" width="36" height="36" />
+        <span class="brand__name">ShortQR</span>
+      </a>
+      <h1 class="hero__title">Acorta tu enlace, genera su QR</h1>
+      <p class="hero__subtitle">
+        Pega una URL y obtén un enlace corto con su código QR, listo para compartir.
+      </p>
+    </header>
+
+    <UrlForm />
+
+    <section class="result" id="result" aria-live="polite" hidden>
+      <ResultCard />
+    </section>
+
+    <footer class="footer">
+      <p>Enlaces cortos con código QR · Hecho con Astro, MongoDB y Vercel</p>
+    </footer>
+  </main>
+
+  <script>
+    interface CreatedPayload {
+      shortUrl: string
+      slug: string
+    }
+
+    const STORAGE_KEY = 'shortqr:last-result'
+    const resultSection = document.querySelector<HTMLElement>('#result')
+
+    function showResult(payload: CreatedPayload): void {
+      if (!resultSection) return
+
+      const link = resultSection.querySelector<HTMLAnchorElement>('[data-result-short]')
+      if (link) {
+        link.href = payload.shortUrl
+        link.textContent = payload.shortUrl
+      }
+
+      resultSection.hidden = false
+      window.dispatchEvent(new CustomEvent<CreatedPayload>('shortqr:render', { detail: payload }))
+      resultSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    }
+
+    window.addEventListener('shortqr:created', (event) => {
+      const payload = (event as CustomEvent<CreatedPayload>).detail
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
+      showResult(payload)
+    })
+
+    const saved = sessionStorage.getItem(STORAGE_KEY)
+    if (saved) {
+      try {
+        showResult(JSON.parse(saved) as CreatedPayload)
+      } catch {
+        sessionStorage.removeItem(STORAGE_KEY)
+      }
+    }
+  </script>
+</BaseLayout>

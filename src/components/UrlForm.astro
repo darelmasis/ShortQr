@@ -1,0 +1,90 @@
+---
+import Button from './Button.astro'
+---
+
+<form class="url-form" id="url-form" novalidate>
+  <div class="url-form__row">
+    <label class="sr-only" for="url-input">URL a acortar</label>
+    <input
+      id="url-input"
+      class="url-form__input"
+      name="url"
+      type="text"
+      inputmode="url"
+      autocomplete="off"
+      spellcheck="false"
+      placeholder="Pega tu URL aquí, por ejemplo: https://ejemplo.com"
+      data-url-input
+    />
+    <Button class="url-form__submit" type="submit" data-submit>Generar</Button>
+  </div>
+  <p class="form-error" data-form-error role="alert" hidden></p>
+</form>
+
+<script>
+  interface CreateApiResponse {
+    success: boolean
+    shortUrl?: string
+    slug?: string
+    error?: string
+  }
+
+  const form = document.querySelector<HTMLFormElement>('#url-form')
+  const input = document.querySelector<HTMLInputElement>('[data-url-input]')
+  const submit = document.querySelector<HTMLButtonElement>('[data-submit]')
+  const error = document.querySelector<HTMLParagraphElement>('[data-form-error]')
+
+  function showError(message: string): void {
+    if (!error) return
+    error.textContent = message
+    error.hidden = false
+  }
+
+  function clearError(): void {
+    if (!error) return
+    error.hidden = true
+  }
+
+  function setLoading(loading: boolean): void {
+    if (!submit) return
+    submit.disabled = loading
+    submit.textContent = loading ? 'Generando…' : 'Generar'
+  }
+
+  form?.addEventListener('submit', async (event) => {
+    event.preventDefault()
+    clearError()
+
+    const url = input?.value.trim() ?? ''
+    if (url.length === 0) {
+      showError('Escribe una URL para continuar.')
+      input?.focus()
+      return
+    }
+
+    setLoading(true)
+    try {
+      const response = await fetch('/api/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url }),
+      })
+      const data = (await response.json()) as CreateApiResponse
+
+      if (!response.ok || !data.shortUrl || !data.slug) {
+        showError(data.error ?? 'No se pudo crear el enlace. Intenta de nuevo.')
+        return
+      }
+
+      window.dispatchEvent(
+        new CustomEvent('shortqr:created', {
+          detail: { shortUrl: data.shortUrl, slug: data.slug },
+        }),
+      )
+    } catch {
+      showError('No se pudo conectar con el servidor. Intenta de nuevo.')
+    } finally {
+      setLoading(false)
+    }
+  })
+</script>

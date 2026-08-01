@@ -11,6 +11,9 @@ dist/
 .env.local
 .env.*.local
 
+# Certificados locales de desarrollo
+.cert/
+
 # Sistema
 .DS_Store
 Thumbs.db

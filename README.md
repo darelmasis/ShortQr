@@ -64,9 +64,25 @@ Vercel.
 4. Ejecutar:
 
    ```bash
-   npm run dev      # desarrollo (expuesto en la red local, ej: http://192.168.x.x:4321)
+   npm run dev      # desarrollo (expuesto en la red local, ej: https://192.168.x.x:4321)
    npm run build    # producción (genera .vercel/output)
    npm run preview  # previsualizar el build localmente
+   ```
+
+   El servidor de desarrollo se sirve por **HTTPS** (con `mkcert`) para que
+   el navegador habilite APIs de contexto seguro — necesario para **copiar el
+   QR como PNG** al portapapeles desde la red local.
+
+   ```bash
+   mkcert -install                            # instala la CA local (una vez)
+   mkcert -key-file .cert/key.pem -cert-file .cert/cert.pem localhost 192.168.1.4
+   ```
+
+   En el PC, la CA ya queda en el almacén de confianza de Windows. Para probar
+   desde el **móvil**, exporta la CA y confíala en el dispositivo:
+
+   ```bash
+   mkcert -CAROOT                             # ruta con rootCA.pem
    ```
 
    El CSS se sirve minificado tanto en desarrollo como en producción

@@ -144,32 +144,7 @@ import Button from './Button.astro'
         return true
       }
     } catch {}
-
-    try {
-      const url = URL.createObjectURL(blob)
-      const img = document.createElement('img')
-      img.src = url
-      img.alt = ''
-      img.style.position = 'fixed'
-      img.style.top = '0'
-      img.style.left = '-10000px'
-      img.style.width = '1px'
-      img.style.height = '1px'
-      document.body.appendChild(img)
-      await img.decode()
-      const range = document.createRange()
-      range.selectNodeContents(img)
-      const selection = window.getSelection()
-      selection?.removeAllRanges()
-      selection?.addRange(range)
-      const ok = document.execCommand('copy')
-      selection?.removeAllRanges()
-      img.remove()
-      URL.revokeObjectURL(url)
-      return ok
-    } catch {
-      return false
-    }
+    return false
   }
 
   function setState(button: HTMLButtonElement | null, status: HTMLElement | null, state: 'idle' | 'ok' | 'err'): void {

@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro'
+import { getSessionUser } from '@/lib/auth'
 import { resolveBaseUrl } from '@/lib/env'
 import { buildShortUrl, createLink } from '@/lib/links'
 import { errorResponse, jsonResponse } from '@/lib/response'
@@ -6,6 +7,11 @@ import type { CreateLinkResult } from '@/lib/types'
 import { normalizeUrl } from '@/lib/validation'
 
 export const POST: APIRoute = async ({ request }) => {
+  const user = getSessionUser(request)
+  if (!user) {
+    return errorResponse('Debes iniciar sesión para crear enlaces.', 401)
+  }
+
   let body: unknown
   try {
     body = await request.json()

@@ -1,10 +1,12 @@
 ---
-// Página estática: se sirve desde el CDN de Vercel, sin tocar la base de datos.
-export const prerender = true
-
+// Página SSR: lee la sesión (cookie firmada) para mostrar el estado de login.
 import BaseLayout from '@/layouts/BaseLayout.astro'
+import { getSessionUser } from '@/lib/auth'
 import ResultCard from '@/components/ResultCard.astro'
+import SiteHeader from '@/components/SiteHeader.astro'
 import UrlForm from '@/components/UrlForm.astro'
+
+const user = getSessionUser(Astro.request)
 
 const pageTitle = 'ShortQR · Acortador de URLs con código QR'
 const pageDescription = 'Crea enlaces cortos y genera su código QR al instante.'
@@ -12,11 +14,8 @@ const pageDescription = 'Crea enlaces cortos y genera su código QR al instante.
 
 <BaseLayout title={pageTitle} description={pageDescription}>
   <main class="page">
+    <SiteHeader user={user} />
     <header class="hero">
-      <a class="brand" href="/" aria-label="ShortQR — inicio">
-        <img class="brand__mark" src="/favicon.svg" alt="" width="36" height="36" />
-        <span class="brand__name">ShortQR</span>
-      </a>
       <h1 class="hero__title">Acorta tu enlace, genera su QR</h1>
       <p class="hero__subtitle">
         Pega una URL y obtén un enlace corto con su código QR, listo para compartir.
@@ -24,7 +23,7 @@ const pageDescription = 'Crea enlaces cortos y genera su código QR al instante.
     </header>
 
     <div class="workspace">
-      <UrlForm />
+      <UrlForm user={user} />
 
       <section class="result" id="result" aria-live="polite" hidden>
         <ResultCard />

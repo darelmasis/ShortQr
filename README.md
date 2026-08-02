@@ -16,6 +16,7 @@ Vercel.
 ## Características
 
 - Acortado de URLs con slugs criptográficos sin colisiones
+- **Inicio de sesión con Google** (OAuth 2.0 + PKCE); crear enlaces requiere sesión
 - **QR directo**: generar el código QR con la URL tal cual, sin acortar
 - QR en **negro** con módulos cuadrados (clásico)
 - **Copiar el QR** como **PNG** (1024 px) o **SVG** desde el portapapeles
@@ -49,17 +50,39 @@ Vercel.
    MONGODB_DATABASE=shortqr
    BASE_URL=https://dominio.com
    SLUG_LENGTH=6
+   GOOGLE_CLIENT_ID=xxxx.apps.googleusercontent.com
+   GOOGLE_CLIENT_SECRET=GOCSPX-xxxx
+   SESSION_SECRET=cadena-aleatoria-de-al-menos-32-caracteres
    ```
 
-   | Variable            | Descripción                                                       | Requerida |
-   | ------------------- | ----------------------------------------------------------------- | --------- |
-   | `MONGODB_URI`       | Cadena de conexión de MongoDB Atlas.                              | Sí        |
-   | `MONGODB_DATABASE`  | Nombre de la base de datos. Si se omite, se toma de la URI.       | No        |
-   | `BASE_URL`          | Dominio público del sitio (usado en la URL corta generada).       | No*       |
-   | `SLUG_LENGTH`       | Longitud de los slugs (entre 4 y 12, por defecto 6).              | No        |
+   | Variable             | Descripción                                                       | Requerida |
+   | -------------------- | ----------------------------------------------------------------- | --------- |
+   | `MONGODB_URI`        | Cadena de conexión de MongoDB Atlas.                              | Sí        |
+   | `MONGODB_DATABASE`   | Nombre de la base de datos. Si se omite, se toma de la URI.       | No        |
+   | `BASE_URL`           | Dominio público del sitio (usado en la URL corta generada).       | No*       |
+   | `SLUG_LENGTH`        | Longitud de los slugs (entre 4 y 12, por defecto 6).              | No        |
+   | `GOOGLE_CLIENT_ID`   | Client ID de la app OAuth de Google.                              | Sí        |
+   | `GOOGLE_CLIENT_SECRET` | Client Secret de la app OAuth de Google.                        | Sí        |
+   | `SESSION_SECRET`     | Secreto para firmar la cookie de sesión (mín. 32 caracteres).     | Sí        |
 
    \* Si `BASE_URL` se omite, se usa el origin de cada request — útil en
    previews de Vercel, pero en producción se recomienda fijarla.
+
+### Inicio de sesión con Google
+
+Crear enlaces cortos requiere sesión (Google OAuth 2.0 + PKCE, sesión en
+cookie firmada con JWT). Para configurarlo:
+
+1. En [Google Cloud Console → Credenciales](https://console.cloud.google.com/apis/credentials)
+   crea una app OAuth y añade estas **URIs de redirección autorizadas**:
+   - Desarrollo: `https://192.168.1.4:4321/api/auth/callback` (tu IP local)
+   - Producción: `https://dominio.com/api/auth/callback`
+2. Copia el **Client ID** y **Client Secret** a `.env` (o a las variables de
+   entorno de Vercel).
+3. Genera un `SESSION_SECRET` largo: `openssl rand -hex 32`.
+
+Flujo: `/api/auth/login` → consentimiento de Google → `/api/auth/callback`
+firma la cookie y redirige a `/`. `/api/create` devuelve `401` sin sesión.
 
 4. Ejecutar:
 

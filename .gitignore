@@ -4,7 +4,7 @@ node_modules/
 # Build
 dist/
 .vercel/
-.astro/
+
 
 # Entorno (nunca subir credenciales)
 .env
@@ -18,3 +18,5 @@ dist/
 .DS_Store
 Thumbs.db
 *.log
+
+.vercel

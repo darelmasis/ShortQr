@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    { "source": "/", "destination": "/index.html" },
+    { "source": "/enlaces", "destination": "/index.html" },
+    { "source": "/:slug", "destination": "/api/redirect?slug=:slug" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

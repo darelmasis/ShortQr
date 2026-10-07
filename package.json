@@ -3,38 +3,37 @@
   "type": "module",
   "version": "0.1.0",
   "private": true,
-  "description": "Acortador de URLs con generación de códigos QR — Astro + MongoDB Atlas + Vercel Serverless",
+  "description": "Acortador de URLs con generación de códigos QR — React + Vite + quickit-ui + MongoDB Atlas + Vercel Serverless",
   "engines": {
-    "node": ">=18.17.1"
+    "node": ">=20.19.0"
   },
   "scripts": {
-    "dev": "astro dev --host",
-    "build": "astro build",
-    "preview": "astro preview",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "typecheck": "astro check"
+    "format:check": "prettier --check ."
   },
   "dependencies": {
-    "@astrojs/vercel": "^11.0.4",
-    "astro": "^7.1.6",
     "mongodb": "^7.5.0",
-    "qrcode": "^1.5.4"
+    "qrcode": "^1.5.4",
+    "quickit-ui": "^1.8.1",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-router-dom": "^7.18.2"
   },
   "devDependencies": {
-    "@astrojs/check": "^0.9.10",
-    "@types/node": "^26.1.2",
-    "@types/qrcode": "^1.5.6",
-    "cssnano": "^8.0.2",
+    "@eslint/js": "^10.0.1",
+    "@tailwindcss/vite": "^4.3.3",
+    "@vitejs/plugin-react": "^6.0.5",
+    "esbuild": "^0.28.1",
     "eslint": "^10.8.0",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-astro": "^1.7.0",
-    "postcss": "^8.5.25",
+    "globals": "^16.5.0",
     "prettier": "^3.9.6",
-    "prettier-plugin-astro": "^0.14.1",
-    "typescript": "^6.0.3",
-    "typescript-eslint": "^8.65.0"
+    "tailwindcss": "^4.3.3",
+    "vite": "^8.2.0"
   }
 }

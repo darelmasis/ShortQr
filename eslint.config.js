@@ -1,15 +1,29 @@
-import eslintPluginAstro from 'eslint-plugin-astro'
-import tseslint from 'typescript-eslint'
+import globals from 'globals'
+import js from '@eslint/js'
 import eslintConfigPrettier from 'eslint-config-prettier'
 
-export default tseslint.config(
+export default [
   {
-    ignores: ['dist/**', '.vercel/**', 'node_modules/**', '.astro/**'],
+    ignores: ['dist/**', '.vercel/**', 'node_modules/**'],
   },
+  js.configs.recommended,
   {
-    files: ['**/*.{ts,mts,cts}'],
-    extends: [...tseslint.configs.recommended],
+    files: ['**/*.{js,jsx}'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'module',
+      parserOptions: {
+        ecmaFeatures: { jsx: true },
+      },
+      globals: {
+        ...globals.node,
+        ...globals.browser,
+      },
+    },
+    rules: {
+      'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      'no-empty': ['error', { allowEmptyCatch: true }],
+    },
   },
-  ...eslintPluginAstro.configs['flat/recommended'],
   eslintConfigPrettier,
-)
+]

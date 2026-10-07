@@ -4,7 +4,7 @@ import { pathToFileURL } from 'node:url'
 import { build } from 'esbuild'
 
 const ROOT = process.cwd()
-const API_DIR = path.join(ROOT, 'api')
+const SERVER_DIR = path.join(ROOT, 'server')
 const CACHE_DIR = path.join(ROOT, 'node_modules', '.cache', 'shortqr-api')
 
 function loadDotEnv() {
@@ -27,27 +27,6 @@ loadDotEnv()
 
 const compiled = new Map()
 
-function apiFileFor(pathname) {
-  const segments = pathname.replace(/^\/+/, '').split('/').filter(Boolean)
-  if (segments[0] !== 'api' || segments.length < 2) return null
-  const rest = segments.slice(1)
-  for (let i = rest.length; i >= 0; i--) {
-    const prefix = rest.slice(0, i)
-    const trailing = rest.slice(i)
-    const dir = path.join(API_DIR, ...prefix)
-    if (trailing.length === 0) {
-      const exact = `${path.join(dir)}.js`
-      if (existsSync(exact)) return exact
-      const index = path.join(dir, 'index.js')
-      if (existsSync(index)) return index
-    } else if (trailing.length === 1) {
-      const dynamic = path.join(dir, '[slug].js')
-      if (existsSync(dynamic)) return dynamic
-    }
-  }
-  return null
-}
-
 async function loadModule(entry) {
   const stat = statSync(entry)
   const cached = compiled.get(entry)
@@ -57,7 +36,7 @@ async function loadModule(entry) {
 
   const out = path.join(
     CACHE_DIR,
-    entry.slice(API_DIR.length + 1).replaceAll('\\', '/').replace(/\.js$/, '.mjs'),
+    entry.slice(SERVER_DIR.length + 1).replaceAll('\\', '/').replace(/\.js$/, '.mjs'),
   )
   mkdirSync(path.dirname(out), { recursive: true })
 
@@ -108,37 +87,25 @@ async function sendResponse(res, response) {
 
 async function handle(req, res, next) {
   const url = new URL(req.url ?? '/', `http://${req.headers.host ?? 'localhost'}`)
-  const method = (req.method ?? 'GET').toUpperCase()
+  let requestUrl = url
+  let isShortLink = false
 
   try {
-    if (url.pathname.startsWith('/api/')) {
-      const entry = apiFileFor(url.pathname)
-      if (!entry) return next()
-      const mod = await loadModule(entry)
-      const handler = mod?.[method]
-      if (typeof handler !== 'function') {
-        res.statusCode = 405
-        res.end('Method Not Allowed')
-        return
-      }
-      const response = await handler(await buildWebRequest(req))
-      return await sendResponse(res, response)
-    }
-
-    const segments = url.pathname.split('/').filter(Boolean)
-    if (segments.length === 1) {
-      const entry = path.join(API_DIR, 'redirect.js')
-      const mod = await loadModule(entry)
-      const request = await buildWebRequest(
-        req,
-        new URL(`/api/redirect?slug=${encodeURIComponent(segments[0])}`, url.origin),
+    if (!url.pathname.startsWith('/api/')) {
+      const segments = url.pathname.split('/').filter(Boolean)
+      if (segments.length !== 1) return next()
+      isShortLink = true
+      requestUrl = new URL(
+        `/api/redirect?slug=${encodeURIComponent(segments[0])}`,
+        url.origin,
       )
-      const response = await mod.GET(request)
-      if (response.status === 404) return next()
-      return await sendResponse(res, response)
     }
 
-    next()
+    const entry = path.join(SERVER_DIR, 'index.js')
+    const mod = await loadModule(entry)
+    const response = await mod.default(await buildWebRequest(req, requestUrl))
+    if (isShortLink && response.status === 404) return next()
+    return await sendResponse(res, response)
   } catch (error) {
     console.error('[api-dev]', error)
     res.statusCode = 500

@@ -16,12 +16,13 @@ Functions** con **MongoDB Atlas** y login con **Google**.
 ## Estructura
 
 ```
-api/          → Vercel Functions (auth, create, links, stats, redirect)
-  lib/        → lógica de servidor (mongodb, auth, links, validación)
+server/       → lógica de servidor y handlers de rutas API
+  lib/        → mongodb, auth, links, validación
+api/          → una única función serverless catch-all para todas las rutas
 src/          → SPA React
   pages/      → Home, Mis enlaces, 404
   components/ → header, footer, workspace, filas de enlaces
-vercel.json   → rewrites: SPA fallback + redirección de slugs
+vercel.json   → rewrites: SPA fallback + redirección de slugs a `/api/redirect?slug=…`
 ```
 
 ## Características
@@ -102,6 +103,7 @@ npm run build    # compila la SPA a dist/
 npm run lint
 ```
 
-El deploy en Vercel se encarga de: compilar la SPA, empaquetar las funciones
-de `api/` y aplicar `vercel.json` (fallback SPA y redirección de slugs a
-`/api/redirect/:slug`).
+El deploy en Vercel compila la SPA y empaqueta una única función serverless
+catch-all desde `api/[...path].js`, que delega las rutas API en `server/`.
+Esto mantiene el despliegue dentro del límite de 12 funciones del plan Hobby.
+`vercel.json` conserva el fallback SPA y la redirección de slugs.
